@@ -91,27 +91,28 @@ class BFSApplication(ctk.CTk):
         self.graph_type = create_combobox(left, ["undirected", "directed", "tree"], 275)
         self.graph_type.configure(variable=self.graph_type_var, command=self.change_graph_type)
         self.graph_type.pack(padx=18, pady=(3, 10))
-        self.add_field(left, "Розмір випадкового графа")
-        generation_size_row = ctk.CTkFrame(left, fg_color="transparent")
-        generation_size_row.pack(fill="x", padx=10, pady=(3, 8))
-        self.generate_vertex_count = create_entry(generation_size_row, "Vertices", 125)
-        self.generate_edge_count = create_entry(generation_size_row, "Edges", 125)
-        self.generate_vertex_count.insert(0, "30")
-        self.generate_edge_count.insert(0, "48")
-        self.generate_vertex_count.pack(side="left", fill="x", expand=True, padx=2)
-        self.generate_edge_count.pack(side="left", fill="x", expand=True, padx=2)
+        # self.add_field(left, "Розмір випадкового графа")
+        # generation_size_row = ctk.CTkFrame(left, fg_color="transparent")
+        # generation_size_row.pack(fill="x", padx=10, pady=(3, 8))
+        # self.generate_vertex_count = create_entry(generation_size_row, "Vertices", 125)
+        # self.generate_edge_count = create_entry(generation_size_row, "Edges", 125)
+        # self.generate_vertex_count.insert(0, "30")
+        # self.generate_edge_count.insert(0, "48")
+        # self.generate_vertex_count.pack(side="left", fill="x", expand=True, padx=2)
+        # self.generate_edge_count.pack(side="left", fill="x", expand=True, padx=2)
         self.add_field(left, "Початкова вершина")
         self.start_var = ctk.StringVar(value="1")
         self.start_combo = create_combobox(left, [], 275)
         self.start_combo.configure(variable=self.start_var)
         self.start_combo.pack(padx=18, pady=(3, 8))
-        create_button(left, "Вибрати Start на графі", lambda: self.select_on_canvas("start"), width=275, style="secondary").pack(padx=18, pady=(0, 5))
+        # create_button(left, "Вибрати Start на графі", lambda: self.select_on_canvas("start"), width=275, style="secondary").pack(padx=18, pady=(0, 5))
         self.add_field(left, "Цільова вершина")
         self.target_var = ctk.StringVar(value="30")
         self.target_combo = create_combobox(left, [], 275)
         self.target_combo.configure(variable=self.target_var)
         self.target_combo.pack(padx=18, pady=(3, 8))
-        create_button(left, "Вибрати Target на графі", lambda: self.select_on_canvas("target"), width=275, style="secondary").pack(padx=18, pady=(0, 5))
+        create_button(left, "Поміняти Start ↔ Target", self.reverse_search, width=275, style="secondary").pack(padx=18, pady=2)
+        # create_button(left, "Вибрати Target на графі", lambda: self.select_on_canvas("target"), width=275, style="secondary").pack(padx=18, pady=(0, 5))
         self.add_field(left, "Порядок сусідів")
         self.order_var = ctk.StringVar(value="ascending")
         self.order_combo = create_combobox(left, ["ascending", "descending", "custom"], 275)
@@ -128,9 +129,17 @@ class BFSApplication(ctk.CTk):
         create_button(buttons, "Запустити BFS", self.run_bfs, width=132, style="success").pack(side="left", padx=(0, 4))
         create_button(buttons, "Крок", self.step_bfs, width=132).pack(side="left", padx=(4, 0))
         create_button(left, "Побудувати шлях без анімації", self.run_bfs_instant, width=260, style="success").pack(padx=10, pady=(5, 7))
-        create_button(left, "Згенерувати випадковий граф", self.generate_random_graph, width=260, style="secondary").pack(padx=10, pady=2)
         create_button(left, "Очистити пошук", self.reset_search, width=275, style="secondary").pack(padx=18, pady=7)
-        create_button(left, "Поміняти Start ↔ Target", self.reverse_search, width=275, style="secondary").pack(padx=18, pady=2)
+        self.add_field(left, "Розмір випадкового графа")
+        generation_size_row = ctk.CTkFrame(left, fg_color="transparent")
+        generation_size_row.pack(fill="x", padx=10, pady=(3, 8))
+        self.generate_vertex_count = create_entry(generation_size_row, "Vertices", 125)
+        self.generate_edge_count = create_entry(generation_size_row, "Edges", 125)
+        self.generate_vertex_count.insert(0, "30")
+        self.generate_edge_count.insert(0, "48")
+        self.generate_vertex_count.pack(side="left", fill="x", expand=True, padx=2)
+        self.generate_edge_count.pack(side="left", fill="x", expand=True, padx=2)
+        create_button(left, "Згенерувати випадковий граф", self.generate_random_graph, width=260, style="secondary").pack(padx=10, pady=2)
         create_label(left, "Редагування графа", 15, True).pack(padx=18, pady=(15, 7), anchor="w")
 
         vertex_row = ctk.CTkFrame(left, fg_color="transparent")
@@ -141,6 +150,7 @@ class BFSApplication(ctk.CTk):
         for entry in (self.vertex_id, self.vertex_x, self.vertex_y):
             entry.pack(in_=vertex_row, side="left", fill="x", expand=True, padx=2)
         create_button(left, "Додати вершину", self.add_vertex, width=260).pack(padx=10, pady=5)
+        create_button(left, "Видалити вершину", self.remove_vertex, width=260, style="danger").pack(padx=10, pady=5)
 
         edge_row = ctk.CTkFrame(left, fg_color="transparent")
         edge_row.pack(fill="x", padx=10, pady=2)
@@ -155,7 +165,6 @@ class BFSApplication(ctk.CTk):
         create_button(edge_buttons, "Додати edge", self.add_edge, width=125).pack(side="left", fill="x", expand=True, padx=2)
         create_button(edge_buttons, "Видалити edge", self.remove_edge, width=125, style="danger").pack(side="left", fill="x", expand=True, padx=2)
         create_button(left, "Перетворити edge", self.convert_edge, width=260, style="secondary").pack(padx=10, pady=3)
-        create_button(left, "Видалити вершину", self.remove_vertex, width=260, style="danger").pack(padx=10, pady=5)
         create_button(left, "Reset graph", self.reset_graph, width=260, style="secondary").pack(padx=10, pady=2)
         self.status_label = create_label(left, "Готово", 11, color=COLORS["text_secondary"])
         self.status_label.pack(padx=18, pady=(12, 5), anchor="w")
@@ -267,7 +276,15 @@ class BFSApplication(ctk.CTk):
         self.last_result = self.runner.result()
         result = self.last_result
         path = " → ".join(map(str, result.path)) if result.found else "не знайдено"
-        self.result_label.configure(text=f"{'Шлях: ' + path if result.found else 'Шлях не знайдено'} | відкрито: {len(result.expanded_vertices)} | ітерацій: {result.iterations}")
+        self.result_label.configure(
+            text=(
+                f"{'Шлях: ' + path if result.found else 'Шлях не знайдено'}"
+                f" | відкрито: {len(result.expanded_vertices)}"
+                f" | відвідано: {len(result.visited_vertices)}"
+                f" | ітерацій: {result.iterations}"
+                f" | час: {result.elapsed_time * 1000:.3f} ms"
+            )
+        )
         self.status_label.configure(text="Пошук завершено", text_color=COLORS["success"] if result.found else COLORS["danger"])
         self.draw_graph()
 
@@ -610,18 +627,18 @@ class BFSApplication(ctk.CTk):
         card = create_card(self.main)
         card.pack(fill="both", expand=True, pady=(15, 0))
         text = (
-            "BFS explores a graph level by level using a FIFO queue.\n\n"
-            "Algorithm:\n"
-            "1. Put Start in the queue and mark it visited.\n"
-            "2. Remove the first vertex from the queue.\n"
-            "3. Add every unvisited neighbor and remember its parent.\n"
-            "4. Stop at Target or when the queue is empty.\n\n"
-            "Time complexity: O(V + E)\n"
-            "Space complexity: O(V)\n\n"
-            "Advantages: complete for finite graphs; finds a shortest path in an unweighted graph;"
-            " systematic and effective when the target is close.\n\n"
-            "Disadvantages: can use significant memory, expand unnecessary vertices,"
-            " ignore edge weights, and slow down on graphs with a large branching factor."
+            "BFS досліджує граф рівень за рівнем, використовуючи чергу FIFO.\n\n"
+            "Алгоритм:\n"
+            "1. Помістити початкову вершину в чергу та позначити її як відвідану.\n"
+            "2. Вилучити першу вершину з черги.\n"
+            "3. Додати всіх невідвіданих сусідів і запам'ятати їхнього батька (попередника).\n"
+            "4. Зупинитися, коли знайдено цільову вершину або черга спорожніє.\n\n"
+            "Часова складність: O(V + E)\n"
+            "Просторова складність: O(V)\n\n"
+            "Переваги: повний для скінченних графів; знаходить найкоротший шлях у незваженому графі;"
+            " систематичний та ефективний, коли ціль розташована близько.\n\n"
+            "Недоліки: може споживати значний обсяг пам'яті, розгортати зайві вершини,"
+            " ігнорує ваги ребер і сповільнюється на графах із великим коефіцієнтом розгалуження."
         )
         create_label(card, text, 15).pack(padx=28, pady=28, anchor="nw")
 
