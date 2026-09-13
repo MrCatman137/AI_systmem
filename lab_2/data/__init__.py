@@ -1,0 +1,1 @@
+"""Deterministic laboratory graph data."""
