@@ -1,0 +1,1 @@
+"""Laboratory work 5: Dijkstra's shortest-path algorithm."""

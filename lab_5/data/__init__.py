@@ -1,0 +1,1 @@
+"""Predefined data for laboratory work 5."""
